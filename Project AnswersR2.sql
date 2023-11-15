@@ -61,10 +61,10 @@ CREATE TABLE temp_tab4 AS	SELECT * FROM all_sessions AS alls
 							JOIN sales_report AS sr USING(productsku)
 
 --TABLE LEGEND
-			--temp_tab1 = allsessions + analytics
-			--temp_tab2 = allsessions + products
-			--temp_tab3 = allsessions + sales_by_sku
-			--temp_tab4 = allsessions + sales_report
+			--temp_tab1 = allsessions.fullvistorid + analytics.fullvisitorid
+			--temp_tab2 = allsessions.productsku + products.sku
+			--temp_tab3 = allsessions.productsku + sales_by_sku.productsku
+			--temp_tab4 = allsessions.productsku + sales_report.productsku
 
 SELECT * FROM all_sessions --- (15134 rows)   - ALIAS:alls - fullvisitorid, city, country, totaltransactionrevenue, v2productcategory, v2productname, productsku
 SELECT * FROM analytics    --- (1048575 rows) - ALIAS:ana - visitid, fullvisitorid, units_sold, unit_price
@@ -242,6 +242,88 @@ WHERE fullvisitorid IS NOT NULL;
 
 SELECT CONCAT(ROUND(((SELECT COUNT(fullvisitorid) * 1.0 FROM all_sessions WHERE totaltransactionrevenue IS NOT NULL) /
       (SELECT COUNT(fullvisitorid) FROM all_sessions) * 100), 2), '%') AS Percentage;
+
+
+--In the **starting_with_data.md** file, write 3 - 5 new questions that you could answer with this database. For each question, include
+--The queries you used to answer the question
+--The answer to the question.
+
+--Question 1: How many visitors visited the site from San Francisco?
+
+Queries: 
+
+SELECT COUNT(DISTINCT fullvisitorid) AS Tot_Vis_SanF
+FROM all_sessions
+WHERE city = 'San Francisco';
+
+Answer: 432
+
+
+--Question 2: What is the total revenue generated from the United States?
+
+Queries:
+
+SELECT country, ROUND(SUM(totaltransactionrevenue), 2) AS Total_Rev_US
+FROM all_sessions
+WHERE country = 'United States' AND city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
+GROUP BY country
+ORDER BY Total_Rev_US DESC;
+
+Answer: 7061610000.00
+
+
+--Question 3: In which country was the product GGOEGAAX0580 mostly sold?
+
+Queries:
+
+SELECT country, SUM(orderedquantity) AS TotalQuantity
+FROM temp_tab2
+WHERE productsku = 'GGOEGAAX0580'
+GROUP BY country
+ORDER BY TotalQuantity DESC
+LIMIT 1;
+
+Answer: 68
+
+
+--Question 4: What percentage amount of total site visitors per country actually placed an order?
+
+Queries:
+
+SELECT 
+    country, 
+    COUNT(DISTINCT fullvisitorid) AS total_visitors,
+    COUNT(DISTINCT CASE WHEN totaltransactionrevenue IS NOT NULL THEN fullvisitorid END) AS visitors_with_orders,
+    ROUND(
+        100 * COUNT(DISTINCT CASE WHEN totaltransactionrevenue IS NOT NULL THEN fullvisitorid END) /
+        COUNT(DISTINCT fullvisitorid),
+        2
+  	     ) AS order_percentage
+FROM 
+    all_sessions
+WHERE 
+    country IS NOT NULL
+GROUP BY 
+    country
+ORDER BY
+	order_percentage DESC;
+
+Answer: 
+
+
+--Question 5: On what date was the maximum revenue generated on the site?
+
+Queries:
+
+SELECT date, MAX(totaltransactionrevenue) AS MaxRevenue
+FROM temp_tab2
+WHERE totaltransactionrevenue IS NOT NULL
+GROUP BY date
+ORDER BY MaxRevenue DESC
+LIMIT 1;
+
+Answer: 2016-12-13
+
 
 
 
