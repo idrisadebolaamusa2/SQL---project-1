@@ -7,23 +7,23 @@ Answer the following questions and provide the SQL queries used to find the answ
 SQL Queries:
 
 --1A (Countries with the highest level of transaction revenues)
-
+```
 SELECT country, ROUND(SUM(totaltransactionrevenue), 2) AS TotalRevCountry 
 FROM all_sessions
 WHERE city IS NOT null AND totaltransactionrevenue IS NOT null
 GROUP BY country 
 ORDER BY TotalRevCountry DESC
 LIMIT 5;
-
+```
 --1B (Cities with the highest level of transaction revenues)
-
+```
 SELECT city, country, ROUND(SUM(totaltransactionrevenue), 2) AS TotalRevCity 
 FROM all_sessions
 WHERE city IS NOT null AND totaltransactionrevenue IS NOT null
 GROUP BY city, country
 ORDER BY TotalRevCity DESC
 LIMIT 5;
-
+```
 
 Answer:
 Countries: Top 5: United States, Israel, Australia, Canada, Switzerland
@@ -36,45 +36,47 @@ Cities: Top 5: San Francisco, Sunnyvale, Atlanta, Palo Alto, Tel Aviv-Yafo
 SQL Queries:
 
 --2A--average number of products ordered from visitors in each country
-							
+```							
 CREATE TABLE temp_tab1 AS	SELECT all_sessions.fullvisitorid, all_sessions.city, all_sessions.country, all_sessions.totaltransactionrevenue, 
 							all_sessions.v2productcategory, all_sessions.v2productname, all_sessions.productsku, analytics.units_sold, analytics.unit_price 
 							FROM all_sessions
 							JOIN analytics ON all_sessions.fullvisitorid = analytics.fullvisitorid
-							
+```
+```							
 CREATE TABLE temp_tab2 AS	SELECT * FROM all_sessions AS alls
 							JOIN products AS pro ON alls.productsku = pro.sku
-							
+```
+```							
 CREATE TABLE temp_tab3 AS	SELECT * FROM all_sessions AS alls
 							JOIN sales_by_sku AS sbs USING(productsku)
-							
+```
+```						
 CREATE TABLE temp_tab4 AS	SELECT * FROM all_sessions AS alls
 							JOIN sales_report AS sr USING(productsku)
-
---TABLE LEGEND
-			--temp_tab1 = allsessions + analytics
-			--temp_tab2 = allsessions + products
-			--temp_tab3 = allsessions + sales_by_sku
-			--temp_tab4 = allsessions + sales_report
+```
 
 
+```
 SELECT country, ROUND(AVG(orderedquantity), 2) AS avg_qty_country
 FROM temp_tab2
 WHERE orderedquantity IS NOT NULL
 GROUP BY country
 ORDER BY avg_qty_country DESC;
+```
 
 --2B--average number of products ordered from visitors in each city
 
+```
 SELECT city, country, ROUND(AVG(orderedquantity), 2) AS avg_qty_city
 FROM temp_tab2
 WHERE orderedquantity IS NOT NULL AND city IS NOT null 
 GROUP BY city, country 
 ORDER BY avg_qty_city DESC;
+```
 
 Answer:
 
-*the answers are too long. The answer can be fetched once the above codes are run.
+*The answers are too long. The answer can be fetched once the above codes are run.
 
 
 
@@ -84,19 +86,22 @@ Answer:
 SQL Queries:
 
 --3A--(product categories) of products ordered from visitors in each country
+```
 SELECT country, v2productcategory, COUNT(v2productcategory) AS prd_cat_country
 FROM temp_tab1
 WHERE country IS NOT null  
 GROUP BY country, v2productcategory
 ORDER BY prd_cat_country DESC;
+```
 
 --3B--(product categories) of products ordered from visitors in each city
+```
 SELECT city, country, v2productcategory, COUNT(v2productcategory) AS prd_cat_city
 FROM temp_tab1
 WHERE city IS NOT null  
 GROUP BY city, country, v2productcategory
 ORDER BY prd_cat_city DESC;
-
+```
 
 Answer:
 
@@ -114,6 +119,7 @@ Answer:
 SQL Queries:
 
 --4A --top-selling product from each country
+```
 WITH CTE AS 
 			(
   				SELECT country, v2productname AS top_selling_product, 
@@ -129,8 +135,10 @@ WITH CTE AS
   					FROM CTE
 				)
 					SELECT * FROM RankedTable WHERE rank_country = 1;
+```
 
 --4B ---top-selling product from each city
+```
 WITH CTE AS 
 			(
   				SELECT city, country, v2productname AS top_selling_product, 
@@ -147,7 +155,7 @@ WITH CTE AS
   					FROM CTE
 				)
 					SELECT * FROM RankedTable WHERE rank_city = 1;
-					
+```					
 
 Answer:
 
@@ -161,55 +169,64 @@ Answer:
 SQL Queries:
 
 --5A (For Countries)
+```
 SELECT country, ROUND(SUM(totaltransactionrevenue), 2) AS Total_Sum1
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY country
 ORDER BY Total_Sum1 DESC;
-
+```
+```
 SELECT country, ROUND(MAX(totaltransactionrevenue), 2) AS Total_Max1
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY country
 ORDER BY Total_Max1 DESC;
-
+```
+```
 SELECT country, ROUND(MIN(totaltransactionrevenue), 2) AS Total_Min1
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY country
 ORDER BY Total_Min1 DESC;
-
+```
+```
 SELECT country, ROUND(AVG(totaltransactionrevenue), 2) AS Avg_Total1
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY country
 ORDER BY Avg_Total1 DESC;
+```
 
 --5B (For Cities)
+```
 SELECT city, country, ROUND(SUM(totaltransactionrevenue), 2) AS Total_Sum2
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY city, country
 ORDER BY Total_Sum2 DESC;
-
+```
+```
 SELECT city, country, ROUND(MAX(totaltransactionrevenue), 2) AS Total_Max2
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY city, country
 ORDER BY Total_Max2 DESC;
-
+```
+```
 SELECT city, country, ROUND(MIN(totaltransactionrevenue), 2) AS Total_Min2
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY city, country
 ORDER BY Total_Min2 DESC;
-
+```
+```
 SELECT city, country, ROUND(AVG(totaltransactionrevenue), 2) AS Avg_Total2
 FROM all_sessions
 WHERE city IS NOT NULL AND totaltransactionrevenue IS NOT NULL
 GROUP BY city, country
 ORDER BY Avg_Total2 DESC;
- 
+```
 
 Answer:
 
