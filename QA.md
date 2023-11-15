@@ -15,15 +15,24 @@ Describe your QA process and include the SQL queries used to execute it.
 
 Queries used
 
+```
 UPDATE all_sessions
 SET city = null
 WHERE city = '(not set)' OR city = 'not available in demo dataset'
 
+```
+
+```
 UPDATE analytics
 SET unit_price = unit_price/1000000
 
+```
+
+```
 UPDATE analytics
 SET unit_price = ROUND(unit_price, 2) 
+
+```
 
 
 Learnings form the data:
